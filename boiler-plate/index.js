@@ -3,6 +3,7 @@ const app = express();
 const port = 8000;
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const config = require("./config/key");
 
 const { User } = require("./models/User");
 
@@ -13,13 +14,13 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 // mongo DB 연결
-mongoose.connect('db-info', {
+mongoose.connect(config.mongoURI, {
   useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false
 }).then(() => console.log("MongoDb Connect..."))
   .catch((err) => console.log(err));
 
 // /에 get요청시 전달할 내용
-app.get('/', (req, res) => res.send("<h1>Welcome!!</h1><p>This is <mark>Kermit</mark> World!</p>"));
+app.get('/', (req, res) => res.send("<h1>Welcome!!</h1><p>This is <mark>Hacker</mark> World!</p>"));
 
 // 회원가입 라우터
 app.post('/register', (req, res) => {
