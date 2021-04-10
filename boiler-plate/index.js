@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const config = require("./config/key");
 const cookieParser = require("cookie-parser");
+const { auth } = require("./middleware/auth");
 
 const { User } = require("./models/User");
 
@@ -25,7 +26,7 @@ mongoose.connect(config.mongoURI, {
 app.get('/', (req, res) => res.send("<h1>Welcome!!</h1><p>This is <mark>Hacker</mark> World!</p>"));
 
 // register router
-app.post('/register', (req, res) => {
+app.post('api/users/register', (req, res) => {
   
   // 회원가입할때 필요한 정보들을 client에서 가져오면
   // 가져온 정보들을 DB에 넣어준다.
@@ -44,7 +45,7 @@ app.post('/register', (req, res) => {
 });
 
 // login register
-app.post('/login', (req, res) => {
+app.post('/api/users/login', (req, res) => {
   // 요청된 이메일을 데이터베이스에서 있는지 찾는다.
   User.findOne({ email: req.body.email }, (err, user) => {
     if(!user) {
@@ -73,6 +74,22 @@ app.post('/login', (req, res) => {
           });
       });
     });
+  });
+});
+
+// auth router
+// add "auth" middleware
+app.get('api/users/auth', auth, (req, res) => {
+  // 여기까지 middleware를 통과해왔다는 말은
+  // Authentication이 True라는 의미
+  res.status(200).json({
+    _id: req.user._id,
+    isAdmin: req.user.role === 0 ? false: true,
+    isAuth: true,
+    email: req.user.name,
+    lastname: req.user.lastname,
+    role: req.user.role,
+    image: req.user.image
   });
 });
 
