@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const jwt = require("jsonwebtoken");
 
 const userSchema = mongoose.Schema({
   name: {
     type: String,
-    maxlength: 50
+    maxlength: 100
   },
   email: {
     type: String,
@@ -54,9 +55,32 @@ userSchema.pre('save', function(next) {
       });
     });
   } else {
-    next();
+      next();
   }
 });
+
+// pw검증 메소드 작성
+userSchema.methods.comparePassword = function(plainPassword, cb) {
+  bcrypt.compare(plainPassword, this.password, function(err, isMatch) {
+    if(err) return cb(err);
+    
+    cb(null, isMatch);
+  });
+}
+
+// generate Token logic
+userSchema.methods.generateToken = function(cb) {
+  var user = this;
+  // jsonwebtoken을 이용해서 토큰생성
+  var token = jwt.sign(user._id.toHexString(), 'secretToken');
+  
+  user.token = token;
+  user.save(function(err, user) {
+    if(err) return cb(err);
+    
+    cb(null, user);
+  });
+};
 
 // 작성한 mongoDB 스키마 생성
 const User = mongoose.model('User', userSchema);
